@@ -2,13 +2,17 @@ package com.yohan.studi.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.validation.constraints.*;
+import java.io.Serializable;
 
 public class UserForms {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class RegisterForm {
 
         @NotBlank(message = "E-mail cannot be empty")
@@ -30,6 +34,7 @@ public class UserForms {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class LoginForm {
 
         @NotBlank(message = "E-mail cannot be empty")
@@ -42,7 +47,8 @@ public class UserForms {
 
     @Data
     @AllArgsConstructor
-    public static class ForgotPasswordForm {
+    @NoArgsConstructor
+    public static class ForgotPasswordForm implements Serializable {
         @NotBlank(message = "E-mail cannot be empty")
         @Email(message = "Invalid E-mail")
         private String email;
@@ -50,6 +56,7 @@ public class UserForms {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class ConfirmForgotForm {
 
         @NotBlank(message = "code cannot be empty")

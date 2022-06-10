@@ -123,4 +123,21 @@ public class Sys_UserController {
         ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/login", request, String.class);
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, result.getStatusCode());
     }
+
+    @Test
+    public void forgotPassword_Works() throws JSONException {
+        registerUser_Works();
+
+        JSONObject form = new JSONObject();
+        form.put("email", "test@gmail.com");
+
+        HttpEntity<String> request = buildEntity(null, form);
+        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/forgot", request, String.class);
+        System.out.println(result.toString());
+
+        JSONObject jsonResult = new JSONObject(result.getBody());
+
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertTrue((Boolean) jsonResult.get("success"));
+    }
 }
