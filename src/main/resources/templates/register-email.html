@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title th:remove="all">Template for HTML email</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 32px;
+        font-family: Helvetica,serif;
+        background-color: #F6F6F6;
+        display: flex;
+        justify-content: center;
+    }
+    .card--container {
+        padding: 16px;
+        background-color: #FFFFFF;
+    }
+    .title--container {
+        display: flex;
+        background-color: #FFFFFF;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .title--text {
+        color: #023047;
+        font-weight: bold;
+        font-size: 24px;
+        text-align: center;
+    }
+    .title--subtitle {
+        color: rgba(0, 0, 0, 0.56);
+        font-weight: normal;
+        font-size: 14px;
+        text-align: center;
+    }
+    .footer--text {
+        text-align: center;
+        font-size: 14px;
+        color: #023047;
+        font-weight: bold;
+    }
+</style>
+<body>
+<div class="card--container">
+    <div class="title--container">
+        <div class="title--text">Hi <span th:text="${name}">Peter Static</span>,</div>
+        <div class="title--subtitle">Thanks for registering! You can now access the resources to use our services</div>
+    </div>
+    <div style="width: 100%; border-top: 1px solid rgba(0, 0, 0, 0.1); margin-bottom: 16px"></div>
+    <div class="footer--text">
+        STUDI 2020
+    </div>
+</div>
+</body>
+</html>
