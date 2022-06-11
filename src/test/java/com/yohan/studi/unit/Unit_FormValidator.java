@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class Unit_FormValidatorTest {
+public class Unit_FormValidator {
     private FormValidator formValidator;
 
     @Data
