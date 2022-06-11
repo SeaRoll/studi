@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService extends UserDetailsService {
 
+    User getUserByEmail(String email);
+
     /**
      * Loads a User with UserDetails by giving e-mail
      *

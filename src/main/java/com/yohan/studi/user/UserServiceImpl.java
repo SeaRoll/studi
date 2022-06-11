@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
      * @param email email of user to find
      * @return a user
      */
-    private User getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository
                 .getUserByEmail(email)
                 .orElseThrow(() -> {
