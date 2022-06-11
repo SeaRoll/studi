@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class Unit_UserFormTest {
+public class Unit_UserForms {
 
     private FormValidator formValidator;
 
