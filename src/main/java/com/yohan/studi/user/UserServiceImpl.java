@@ -6,13 +6,17 @@ import com.yohan.studi.email.EmailService;
 import com.yohan.studi.exception.BadRequestException;
 import com.yohan.studi.exception.InternalServerException;
 import com.yohan.studi.exception.TooManyException;
+import com.yohan.studi.exception.UnauthorizedException;
 import com.yohan.studi.security.JwtTokenUtil;
 import com.yohan.studi.util.FormValidator;
 import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.yohan.studi.user.UserForms.*;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,13 +47,26 @@ public class UserServiceImpl implements UserService {
      * @param email email of user to find
      * @return a user
      */
-    public User getUserByEmail(String email) {
+    private User getUserByEmail(String email) {
         return userRepository
                 .getUserByEmail(email)
                 .orElseThrow(() -> {
                     log.warn("User with e-mail {} does not exist", email);
                     return new BadRequestException(String.format("User with e-mail %s does not exist", email));
                 });
+    }
+
+    @Override
+    public User getUserByContext() {
+        log.info("Getting user by security context");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken || authentication == null) {
+            log.warn("User not authorized.");
+            throw new UnauthorizedException("Not authenticated");
+        }
+
+        log.info("Got user {} ", authentication.getName());
+        return getUserByEmail(authentication.getName());
     }
 
     /**

@@ -5,6 +5,7 @@ import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.yohan.studi.exception.BadRequestException;
 import com.yohan.studi.exception.TooManyException;
+import com.yohan.studi.exception.UnauthorizedException;
 import com.yohan.studi.user.User;
 import com.yohan.studi.user.UserForms.*;
 import com.yohan.studi.user.UserRepository;
@@ -15,10 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Date;
+import java.util.List;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 
@@ -40,6 +46,32 @@ public class IT_UserService {
     static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("duke", "springboot"))
             .withPerMethodLifecycle(false);
+
+    // Security context returns user
+    @Test
+    public void getUserWithSecurity_Works() {
+        userService.registerUser(new RegisterForm("test@gmail.com", "test", "Yohan123"));
+
+        UserDetails userDetails = userService.loadUserByUsername("test@gmail.com");
+
+        UsernamePasswordAuthenticationToken
+                authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null,
+                userDetails == null ?
+                        List.of() : userDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        User user = userService.getUserByContext();
+        Assertions.assertEquals("test@gmail.com", user.getEmail());
+        Assertions.assertEquals("test", user.getName());
+    }
+
+    @Test
+    public void getUserWithoutSecurity_Throws() {
+        Exception ex = Assertions.assertThrows(UnauthorizedException.class, () -> userService.getUserByContext());
+        Assertions.assertEquals("Not authenticated", ex.getMessage());
+    }
 
     @Test
     public void registerUserReturnsTrue() {

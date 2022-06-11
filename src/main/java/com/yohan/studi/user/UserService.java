@@ -7,7 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService extends UserDetailsService {
 
-    User getUserByEmail(String email);
+    /**
+     * Uses SecurityContextHolder which comes from filter
+     * to return a user.
+     *
+     * @return a user from security
+     */
+    User getUserByContext();
 
     /**
      * Loads a User with UserDetails by giving e-mail
