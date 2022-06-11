@@ -26,6 +26,8 @@ public class Subject {
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false)
+    @Getter
+    @Setter
     private User user;
 
     public Subject(String name, User user) {
