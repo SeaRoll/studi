@@ -108,6 +108,13 @@
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- For patch request -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
