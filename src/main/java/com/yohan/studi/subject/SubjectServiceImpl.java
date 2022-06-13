@@ -47,6 +47,7 @@ public class SubjectServiceImpl implements SubjectService {
         log.info("Patching subject id {}", id);
         User user = userService.getUserByContext();
         Subject subject = getSubjectById(id);
+        formValidator.validateForm(form);
         checkAuthor(user, subject);
         subject.setName(form.getName());
         subjectRepository.save(subject);

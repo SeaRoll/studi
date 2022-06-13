@@ -9,19 +9,16 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,43 +33,27 @@ public class Sys_UserController {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private UserRepository userRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private Sys_Util sysUtil;
+
+    private final String defaultRoute = "/api/v1/auth/";
 
     @RegisterExtension
     static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("duke", "springboot"))
             .withPerMethodLifecycle(false);
 
-    @BeforeEach
-    public void setup() {
-        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-    }
-
-    private HttpEntity<String> buildEntity(String token, JSONObject form) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        if(!Objects.isNull(token))
-            headers.add("Authorization", "Bearer " + token);
-
-        HttpEntity<String> request;
-        if(!Objects.isNull(form))
-            request = new HttpEntity<>(form.toString(), headers);
-        else
-            request = new HttpEntity<>(headers);
-        return request;
-    }
-
     private String getLoginToken() throws JSONException {
         JSONObject form = new JSONObject();
         form.put("email", "test@gmail.com");
         form.put("password", "Yohan123");
 
-        HttpEntity<String> request = buildEntity(null, form);
-        HashMap<String, Object> result = restTemplate.postForObject("http://localhost:" + port + "/api/v1/auth/login", request, HashMap.class);
-        return (String) result.get("token");
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "login", HttpMethod.POST, request);
+        JSONObject res = new JSONObject(result.getBody());
+        return (String) res.get("token");
     }
 
     @Test
@@ -82,12 +63,11 @@ public class Sys_UserController {
         form.put("name", "test");
         form.put("password", "Yohan123");
 
-        HttpEntity<String> request = buildEntity(null, form);
-        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/register", request, String.class);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "/register", HttpMethod.POST, request);
         System.out.println(result.toString());
 
         JSONObject jsonResult = new JSONObject(result.getBody());
-
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Assertions.assertTrue((Boolean) jsonResult.get("success"));
     }
@@ -99,8 +79,8 @@ public class Sys_UserController {
         form.put("name", "test");
         form.put("password", "y");
 
-        HttpEntity<String> request = buildEntity(null, form);
-        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/register", request, String.class);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "/register", HttpMethod.POST, request);
         System.out.println(result.toString());
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
@@ -108,7 +88,7 @@ public class Sys_UserController {
 
     @Test
     public void loginUserValid_Works() throws JSONException {
-        registerUser_Works();
+        sysUtil.registerUser();
         String token = getLoginToken();
         assertTrue(token.length() > 10);
     }
@@ -116,7 +96,7 @@ public class Sys_UserController {
     @Test
     public void loginUserTooManyRequest_Throws() throws JSONException {
         // register
-        registerUser_Works();
+        sysUtil.registerUser();
 
         // form
         JSONObject form = new JSONObject();
@@ -124,24 +104,24 @@ public class Sys_UserController {
         form.put("password", "Yohan123");
 
         // build http entity
-        HttpEntity<String> request = buildEntity(null, form);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
 
         // run 10 times
         for(int i = 0; i < 10; i++)
-            restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/login", request, String.class);
-        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/login", request, String.class);
+            sysUtil.requestServer(port, defaultRoute + "login", HttpMethod.POST, request);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "login", HttpMethod.POST, request);
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, result.getStatusCode());
     }
 
     @Test
     public void forgotPassword_Works() throws JSONException {
-        registerUser_Works();
+        sysUtil.registerUser();
 
         JSONObject form = new JSONObject();
         form.put("email", "test@gmail.com");
 
-        HttpEntity<String> request = buildEntity(null, form);
-        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/forgot", request, String.class);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "forgot", HttpMethod.POST, request);
         System.out.println(result.toString());
 
         JSONObject jsonResult = new JSONObject(result.getBody());
@@ -153,20 +133,20 @@ public class Sys_UserController {
     @Test
     public void forgotPasswordTooManyRequest_Throws() throws JSONException {
         // register
-        registerUser_Works();
+        sysUtil.registerUser();
 
         // form
         JSONObject form = new JSONObject();
         form.put("email", "test@gmail.com");
 
         // build http entity
-        HttpEntity<String> request = buildEntity(null, form);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
 
         // run once
-        restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/forgot", request, String.class);
+        sysUtil.requestServer(port, defaultRoute + "forgot", HttpMethod.POST, request);
 
         // should get too many requests
-        ResponseEntity<String> result = restTemplate.postForEntity("http://localhost:" + port + "/api/v1/auth/forgot", request, String.class);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "forgot", HttpMethod.POST, request);
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, result.getStatusCode());
     }
     
@@ -184,10 +164,10 @@ public class Sys_UserController {
         form.put("newPassword", "Yohan1232");
 
         // build http entity
-        HttpEntity<String> request = buildEntity(null, form);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
 
         // run once
-        ResponseEntity<String> result = restTemplate.exchange("http://localhost:" + port + "/api/v1/auth/confirmforgot", HttpMethod.PATCH, request, String.class);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "confirmforgot", HttpMethod.PATCH, request);
         JSONObject jsonResult = new JSONObject(result.getBody());
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -197,7 +177,7 @@ public class Sys_UserController {
     @Test
     public void confirmPasswordInvalidWithoutForgot_Throws() throws JSONException {
         // register
-        registerUser_Works();
+        sysUtil.registerUser();
 
         // form
         JSONObject form = new JSONObject();
@@ -206,10 +186,10 @@ public class Sys_UserController {
         form.put("newPassword", "Yohan1232");
 
         // build http entity
-        HttpEntity<String> request = buildEntity(null, form);
+        HttpEntity<String> request = sysUtil.buildEntity(null, form);
 
         // run once
-        ResponseEntity<String> result = restTemplate.exchange("http://localhost:" + port + "/api/v1/auth/confirmforgot", HttpMethod.PATCH, request, String.class);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + "confirmforgot", HttpMethod.PATCH, request);
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
 }
