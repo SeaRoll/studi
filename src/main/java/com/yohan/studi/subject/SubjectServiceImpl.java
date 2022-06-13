@@ -44,20 +44,25 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public boolean patchSubject(Integer id, SubjectForm form) {
+        log.info("Patching subject id {}", id);
         User user = userService.getUserByContext();
         Subject subject = getSubjectById(id);
         checkAuthor(user, subject);
         subject.setName(form.getName());
         subjectRepository.save(subject);
+        log.info("Patched subject id {}", id);
         return true;
     }
 
     @Override
     public boolean deleteSubject(Integer id) {
+        log.info("Deleting subject {}", id);
         User user = userService.getUserByContext();
         Subject subject = getSubjectById(id);
         checkAuthor(user, subject);
-        return false;
+        subjectRepository.delete(subject);
+        log.info("Deleted subject {}", id);
+        return true;
     }
 
     /**
@@ -67,8 +72,10 @@ public class SubjectServiceImpl implements SubjectService {
      * @throws ForbiddenException throws if user is not the author
      */
     private void checkAuthor(User user, Subject subject) throws ForbiddenException {
-        if(!subject.getUser().equals(user))
+        if(!subject.getUser().equals(user)) {
+            log.warn("User {} is not the author of subject {}", user.getEmail(), subject.getId());
             throw new ForbiddenException("Not the author");
+        }
     }
 
     private Subject getSubjectById(Integer id) throws BadRequestException {
