@@ -4,6 +4,15 @@ import com.yohan.studi.subject.SubjectForms.*;
 import java.util.List;
 
 public interface SubjectService {
+
+    /**
+     * Gets a subject by id
+     *
+     * @param id id of subject
+     * @return a subject
+     */
+    Subject getSubjectById(Integer id);
+
     /**
      * Creates a subject from form and user from security.
      *

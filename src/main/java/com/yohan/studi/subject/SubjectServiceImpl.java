@@ -68,18 +68,21 @@ public class SubjectServiceImpl implements SubjectService {
 
     /**
      * Checks if user is the author of subject
-     * @param user user
+     *
+     * @param user    user
      * @param subject subject
      * @throws ForbiddenException throws if user is not the author
      */
     private void checkAuthor(User user, Subject subject) throws ForbiddenException {
-        if(!subject.getUser().equals(user)) {
+        if (!subject.getUser().equals(user)) {
             log.warn("User {} is not the author of subject {}", user.getEmail(), subject.getId());
             throw new ForbiddenException("Not the author");
         }
     }
 
-    private Subject getSubjectById(Integer id) throws BadRequestException {
-        return subjectRepository.findById(id).orElseThrow(() -> new BadRequestException(String.format("Subject with id %d does not exist", id)));
+    @Override
+    public Subject getSubjectById(Integer id) {
+        return subjectRepository.findById(id).orElseThrow(() ->
+                new BadRequestException(String.format("Subject with id %d does not exist", id)));
     }
 }

@@ -1,9 +1,13 @@
+/*
+* TODO: Add 403 errors
+* */
 package com.yohan.studi.system;
 
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import com.yohan.studi.user.UserRepository;
+import com.yohan.studi.subject.Subject;
+import com.yohan.studi.subject.SubjectRepository;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +35,7 @@ public class Sys_SubjectController {
     private int port;
 
     @Autowired
-    private UserRepository userRepository;
+    private SubjectRepository subjectRepository;
 
     @Autowired
     private Sys_Util sysUtil;
@@ -87,10 +91,60 @@ public class Sys_SubjectController {
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
-    /*
-    * patch subject returns 200
-    * patch subject with empty form returns 400
-    * delete subject returns 200
-    * delete subject if non-existing returns 400
-    * */
+    @Test
+    public void patchSubjectValid_Returns200() throws JSONException {
+        createSubject_Returns200();
+        JSONObject form = new JSONObject();
+        form.put("name", "Hello World2");
+
+        Subject subject = subjectRepository.findAll().get(0);
+
+        HttpEntity<String> request = sysUtil.buildEntity(sysUtil.loginUser(), form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + subject.getId(), HttpMethod.PATCH, request);
+        System.out.println(result.toString());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    public void patchSubjectNoForm_Returns400() throws JSONException {
+        createSubject_Returns200();
+
+        Subject subject = subjectRepository.findAll().get(0);
+
+        HttpEntity<String> request = sysUtil.buildEntity(sysUtil.loginUser(), null);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + subject.getId(), HttpMethod.PATCH, request);
+        System.out.println(result.toString());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    public void patchSubjectNoSubject_Returns400() throws JSONException {
+        JSONObject form = new JSONObject();
+        form.put("name", "Hello World2");
+
+        HttpEntity<String> request = sysUtil.buildEntity(sysUtil.loginUser(), form);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + 0, HttpMethod.PATCH, request);
+        System.out.println(result.toString());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    public void deleteSubject_Returns200() throws JSONException {
+        createSubject_Returns200();
+
+        Subject subject = subjectRepository.findAll().get(0);
+
+        HttpEntity<String> request = sysUtil.buildEntity(sysUtil.loginUser(), null);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + subject.getId(), HttpMethod.DELETE, request);
+        System.out.println(result.toString());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    public void deleteSubjectNonExisting_Returns400() {
+        HttpEntity<String> request = sysUtil.buildEntity(sysUtil.loginUser(), null);
+        ResponseEntity<String> result = sysUtil.requestServer(port, defaultRoute + 0, HttpMethod.DELETE, request);
+        System.out.println(result.toString());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
 }
