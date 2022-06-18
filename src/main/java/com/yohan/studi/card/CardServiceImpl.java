@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,33 +25,40 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public boolean createCard(CardForms.CreateCardForm form) {
+        log.info("Creating card {}", form);
         formValidator.validateForm(form);
         Subject subject = subjectService.getSubjectById(form.getSubjectId());
         Card newCard = new Card(form.getQuestion(), form.getAnswer(), subject);
         cardRepository.save(newCard);
+        log.info("Card {} saved", form);
         return true;
     }
 
     @Override
     public List<CardDto> getBySubjectId(Integer subjectId) {
+        log.info("Getting cards with subject id {}", subjectId);
         Subject subject = subjectService.getSubjectById(subjectId);
         List<Card> cards = cardRepository.getCardsBySubject(subject.getId());
+        log.info("{} cards found", cards.size());
         return cards.stream().map(CardDto::new).toList();
     }
 
     @Override
     public boolean changeCard(Integer cardId, CardForms.ChangeCardForm form) {
+        log.info("Changing card id {} to fields {}", cardId, form);
         Card oldCard = getCardById(cardId);
         subjectService.getSubjectById(oldCard.getSubject().getId());
         formValidator.validateForm(form);
         oldCard.setAnswer(form.getAnswer());
         oldCard.setQuestion(form.getQuestion());
         cardRepository.save(oldCard);
+        log.info("Card id {} was saved with fields {}", cardId, form);
         return true;
     }
 
     @Override
     public boolean pushDueDate(Integer id) {
+        log.info("Pushing due date of card {}", id);
         final int OFFSET = 1;
         final int MULTIPLY = 2;
         final int MAX_LEVEL = 92;
@@ -72,14 +77,17 @@ public class CardServiceImpl implements CardService {
         card.setLevel(card.getLevel() + 1);
 
         cardRepository.save(card);
+        log.info("Pushing due date of card {} to date {}", id, ldt);
         return true;
     }
 
     @Override
     public boolean deleteCard(Integer id) {
+        log.info("deleting card {}", id);
         Card card = getCardById(id);
         subjectService.getSubjectById(card.getSubject().getId());
         cardRepository.delete(card);
+        log.info("card {} deleted", id);
         return true;
     }
 
