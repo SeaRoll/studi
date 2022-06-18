@@ -3,6 +3,7 @@ package com.yohan.studi.card;
 import com.yohan.studi.exception.BadRequestException;
 import com.yohan.studi.subject.Subject;
 import com.yohan.studi.subject.SubjectService;
+import com.yohan.studi.util.DateUtils;
 import com.yohan.studi.util.FormValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,36 +66,13 @@ public class CardServiceImpl implements CardService {
         }
 
         // add by days
-        LocalDate ldt = convertToLocalDateViaInstant(card.getDueDate());
+        LocalDate ldt = DateUtils.dateToLocalDate(card.getDueDate());
         ldt = ldt.plusDays((card.getLevel() * MULTIPLY) + OFFSET);
-        card.setDueDate(convertToDateViaInstant(ldt));
+        card.setDueDate(DateUtils.localDateToDate(ldt));
         card.setLevel(card.getLevel() + 1);
 
         cardRepository.save(card);
         return true;
-    }
-
-    /**
-     * Converts date to localDate
-     *
-     * @param dateToConvert date to convert
-     * @return localDate format date
-     */
-    private LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return dateToConvert.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
-
-    /**
-     * Converts localDate to date
-     * @param dateToConvert localDate to convert
-     * @return date
-     */
-    private Date convertToDateViaInstant(LocalDate dateToConvert) {
-        return java.util.Date.from(dateToConvert.atStartOfDay()
-                .atZone(ZoneId.systemDefault())
-                .toInstant());
     }
 
     @Override

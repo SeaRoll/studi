@@ -17,6 +17,7 @@ import com.yohan.studi.user.User;
 import com.yohan.studi.user.UserForms;
 import com.yohan.studi.user.UserRepository;
 import com.yohan.studi.user.UserService;
+import com.yohan.studi.util.DateUtils;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -198,13 +199,7 @@ public class IT_CardService {
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
-        assertEquals(convertToLocalDateViaInstant(today).plusDays(1), convertToLocalDateViaInstant(card.getDueDate()));
-    }
-
-    private LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return dateToConvert.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+        assertEquals(DateUtils.dateToLocalDate(today).plusDays(1), DateUtils.dateToLocalDate(card.getDueDate()));
     }
 
     @Test
@@ -215,7 +210,7 @@ public class IT_CardService {
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
-        assertEquals(convertToLocalDateViaInstant(today).plusDays(4), convertToLocalDateViaInstant(card.getDueDate()));
+        assertEquals(DateUtils.dateToLocalDate(today).plusDays(4), DateUtils.dateToLocalDate(card.getDueDate()));
     }
 
     @Test
@@ -227,7 +222,7 @@ public class IT_CardService {
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
-        assertEquals(convertToLocalDateViaInstant(today).plusDays(9), convertToLocalDateViaInstant(card.getDueDate()));
+        assertEquals(DateUtils.dateToLocalDate(today).plusDays(9), DateUtils.dateToLocalDate(card.getDueDate()));
     }
 
     /*
