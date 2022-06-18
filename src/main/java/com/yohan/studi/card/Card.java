@@ -1,7 +1,6 @@
 package com.yohan.studi.card;
 
 import com.yohan.studi.subject.Subject;
-import com.yohan.studi.user.User;
 import lombok.*;
 
 import javax.persistence.*;
