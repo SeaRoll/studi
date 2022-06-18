@@ -22,4 +22,15 @@ public class CardForms {
         @NotNull(message = "Subject id is required")
         private Integer subjectId;
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChangeCardForm {
+        @NotBlank(message = "Question can't be empty")
+        private String question;
+
+        @NotBlank(message = "Answer can't be empty")
+        private String answer;
+    }
 }
