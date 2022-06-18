@@ -35,6 +35,11 @@ public class Card {
     @Column(name="due_date")
     private Date dueDate;
 
+    @Getter
+    @Setter
+    @Column(name="level")
+    private Integer level;
+
     @ManyToOne
     @JoinColumn(name="subject_id", nullable = false)
     @Getter
@@ -45,5 +50,7 @@ public class Card {
         this.question = question;
         this.answer = answer;
         this.subject = subject;
+        this.level = 0;
+        this.dueDate = new Date();
     }
 }
