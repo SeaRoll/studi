@@ -68,4 +68,10 @@ public class Unit_FormValidator {
         // assert does throw
         Assertions.assertThrows(BadRequestException.class, () -> formValidator.validateForm(test));
     }
+
+    @Test
+    public void nullForm_Throws() {
+        // assert does throw
+        Assertions.assertThrows(BadRequestException.class, () -> formValidator.validateForm(null));
+    }
 }

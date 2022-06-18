@@ -22,6 +22,10 @@ public class FormValidator {
      */
     public void validateForm(Object object) {
         log.info("Validating form");
+        if(object == null) {
+            log.warn("Object is null, throwing");
+            throw new BadRequestException("Null object");
+        }
         Validator validator = Validation.byProvider(HibernateValidator.class)
                 .configure()
                 .failFast(true)
