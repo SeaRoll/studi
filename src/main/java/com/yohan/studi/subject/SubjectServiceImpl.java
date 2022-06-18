@@ -82,7 +82,9 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public Subject getSubjectById(Integer id) {
-        return subjectRepository.findById(id).orElseThrow(() ->
+        Subject subject = subjectRepository.findById(id).orElseThrow(() ->
                 new BadRequestException(String.format("Subject with id %d does not exist", id)));
+        checkAuthor(userService.getUserByContext(), subject);
+        return subject;
     }
 }
