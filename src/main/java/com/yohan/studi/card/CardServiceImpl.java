@@ -59,10 +59,14 @@ public class CardServiceImpl implements CardService {
     @Override
     public boolean pushDueDate(Integer id, int difficulty) {
         log.info("Pushing due date of card {} with difficulty {}", id, difficulty);
+        if(difficulty < 0 || difficulty > 3) {
+            log.warn("Difficulty is {} but only 0 to 3 is allowed", difficulty);
+            throw new BadRequestException("Difficulty must be within 0 or 3");
+        }
         final int OFFSET = 1;
         final int MULTIPLY_HARD = 1;
         final int MULTIPLY_MEDIUM = 2;
-        final int MULTIPLY_EASY = 3;
+        final int MULTIPLY_EASY = 4;
         final int MAX_LEVEL = 92;
         Card card = getCardById(id);
         subjectService.getSubjectById(card.getSubject().getId());

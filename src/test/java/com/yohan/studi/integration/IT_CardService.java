@@ -176,6 +176,8 @@ public class IT_CardService {
     *  - level 0 pushes by 1 day & returns true
     *  - level 1 pushes by 4 days & returns true
     *  - level 2 pushes by 9 days & returns true
+    *  - level 2 and difficulty one pushes to 10 days forward
+    *  - level 1 and difficulty three pushes to 1 + 5 = 6 days
     */
     @Test
     public void pushDueDateEmptyId_Throws() {
@@ -221,6 +223,28 @@ public class IT_CardService {
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
         assertEquals(DateUtils.dateToLocalDate(today).plusDays(9), DateUtils.dateToLocalDate(card.getDueDate()));
+    }
+
+    @Test
+    public void pushDueDateLevel1Extreme_Add2Day() {
+        cardService.createCard(new CardForms.CreateCardForm("Hello", "World", 1));
+        cardService.pushDueDate(1, 2);
+        cardService.pushDueDate(1, 0);
+
+        Card card = cardRepository.findById(1).orElseThrow();
+        Date today = new Date();
+        assertEquals(DateUtils.dateToLocalDate(today).plusDays(2), DateUtils.dateToLocalDate(card.getDueDate()));
+    }
+
+    @Test
+    public void pushDueDateLevel1Easy_Add6Day() {
+        cardService.createCard(new CardForms.CreateCardForm("Hello", "World", 1));
+        cardService.pushDueDate(1, 2);
+        cardService.pushDueDate(1, 3);
+
+        Card card = cardRepository.findById(1).orElseThrow();
+        Date today = new Date();
+        assertEquals(DateUtils.dateToLocalDate(today).plusDays(6), DateUtils.dateToLocalDate(card.getDueDate()));
     }
 
     /*
