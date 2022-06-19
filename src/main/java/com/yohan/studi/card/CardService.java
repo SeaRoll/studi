@@ -8,7 +8,7 @@ public interface CardService {
 
     boolean changeCard(Integer cardId, CardForms.ChangeCardForm form);
 
-    boolean pushDueDate(Integer id);
+    boolean pushDueDate(Integer id, int difficulty);
 
     boolean deleteCard(Integer id);
 }

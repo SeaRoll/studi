@@ -29,8 +29,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -181,7 +179,7 @@ public class IT_CardService {
     */
     @Test
     public void pushDueDateEmptyId_Throws() {
-        assertThrows(BadRequestException.class, () -> cardService.pushDueDate(1));
+        assertThrows(BadRequestException.class, () -> cardService.pushDueDate(1, 2));
     }
 
     @Test
@@ -189,13 +187,13 @@ public class IT_CardService {
         User user = userRepository.save(new User("hello@gmail.com", "bro", "Yohan123"));
         Subject subject = subjectRepository.save(new Subject("Hi", user));
         Card card = cardRepository.save(new Card("Hello", "World", subject));
-        assertThrows(ForbiddenException.class, () -> cardService.pushDueDate(card.getId()));
+        assertThrows(ForbiddenException.class, () -> cardService.pushDueDate(card.getId(), 2));
     }
 
     @Test
     public void pushDueDateLevel0_Add1Day() {
         cardService.createCard(new CardForms.CreateCardForm("Hello", "World", 1));
-        cardService.pushDueDate(1);
+        cardService.pushDueDate(1, 2);
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
@@ -205,8 +203,8 @@ public class IT_CardService {
     @Test
     public void pushDueDateLevel1_Add4Day() {
         cardService.createCard(new CardForms.CreateCardForm("Hello", "World", 1));
-        cardService.pushDueDate(1);
-        cardService.pushDueDate(1);
+        cardService.pushDueDate(1, 2);
+        cardService.pushDueDate(1, 2);
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();
@@ -216,9 +214,9 @@ public class IT_CardService {
     @Test
     public void pushDueDateLevel2_Add9Day() {
         cardService.createCard(new CardForms.CreateCardForm("Hello", "World", 1));
-        cardService.pushDueDate(1);
-        cardService.pushDueDate(1);
-        cardService.pushDueDate(1);
+        cardService.pushDueDate(1, 2);
+        cardService.pushDueDate(1, 2);
+        cardService.pushDueDate(1, 2);
 
         Card card = cardRepository.findById(1).orElseThrow();
         Date today = new Date();

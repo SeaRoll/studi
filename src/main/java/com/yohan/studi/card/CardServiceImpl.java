@@ -57,10 +57,12 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public boolean pushDueDate(Integer id) {
-        log.info("Pushing due date of card {}", id);
+    public boolean pushDueDate(Integer id, int difficulty) {
+        log.info("Pushing due date of card {} with difficulty {}", id, difficulty);
         final int OFFSET = 1;
-        final int MULTIPLY = 2;
+        final int MULTIPLY_HARD = 1;
+        final int MULTIPLY_MEDIUM = 2;
+        final int MULTIPLY_EASY = 3;
         final int MAX_LEVEL = 92;
         Card card = getCardById(id);
         subjectService.getSubjectById(card.getSubject().getId());
@@ -72,7 +74,15 @@ public class CardServiceImpl implements CardService {
 
         // add by days
         LocalDate ldt = DateUtils.dateToLocalDate(card.getDueDate());
-        ldt = ldt.plusDays((card.getLevel() * MULTIPLY) + OFFSET);
+        int totalDaysToAdd = switch (difficulty) {
+            case 0 -> 1;
+            case 1 -> (card.getLevel() * MULTIPLY_HARD) + OFFSET;
+            case 2 -> (card.getLevel() * MULTIPLY_MEDIUM) + OFFSET;
+            case 3 -> (card.getLevel() * MULTIPLY_EASY) + OFFSET;
+            default -> 0;
+        };
+
+        ldt = ldt.plusDays(totalDaysToAdd);
         card.setDueDate(DateUtils.localDateToDate(ldt));
         card.setLevel(card.getLevel() + 1);
 
